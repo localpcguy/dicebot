@@ -1,0 +1,17 @@
+{
+  "name": "dicebot",
+  "version": "0.0.1",
+  "description": "Bot for Slack to roll dice",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Mike Behnke",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.x.x",
+    "express": "^4.x.x",
+    "request": "^2.x.x"
+  }
+}
