@@ -17,7 +17,7 @@ var Die = {
 };
 
 var _path = config.INCOMING_WEBHOOK_PATH;
-var _uri = 'https://hooks.slack.com/services' + _path;
+var _uri = config.API_URI + _path;
 var _isMock = false;
 
 module.exports = {
@@ -42,7 +42,13 @@ module.exports = {
 				icon_emoji: ':game_die:'
 			};
 
+		console.log(req.body.command, req.body.user_name, req.body.text);
+
 		if (!!req.body.text) {
+			// Check token, reject if wrong
+			if (req.body.token !== config.token) {
+				return next(new Error('Invalid authorization to access this bot'));
+			}
 			// extract all dice
 			while (loopdie = /\d{1,2}d\d{1,2}/i.exec(reqtext)) {
 				reqtext = reqtext.replace(loopdie[0], '');
