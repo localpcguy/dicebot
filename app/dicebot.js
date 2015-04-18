@@ -42,12 +42,13 @@ module.exports = {
 				icon_emoji: ':game_die:'
 			};
 
-		console.log(req.body.command, req.body.user_name, req.body.text);
+		console.log(req.body.user_name, req.body.text);
 
 		if (!!req.body.text) {
 			// Check token, reject if wrong
 			if (req.body.token !== config.TOKEN) {
-				return res.status(401).send('Invalid authorization to access this bot');
+				res.status(401).send('Invalid authorization to access this bot');
+				return false;
 			}
 			// extract all dice
 			while (loopdie = /\d{1,2}d\d{1,2}/i.exec(reqtext)) {
