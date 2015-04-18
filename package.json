@@ -4,7 +4,7 @@
   "description": "Bot for Slack to roll dice",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/.bin/mocha",
     "start": "node index.js"
   },
   "author": "Mike Behnke",
@@ -13,5 +13,10 @@
     "body-parser": "^1.x.x",
     "express": "^4.x.x",
     "request": "^2.x.x"
+  },
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "mocha": "^2.2.4",
+    "supertest": "^0.15.0"
   }
 }

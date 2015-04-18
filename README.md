@@ -6,5 +6,6 @@ credit to: http://www.sitepoint.com/getting-started-slack-bots/
 
 ### Todo:
 
-- [ ] Add functionality for a modifier
-- [ ] Add functionality for multiple die "sets"
+- [x] Add functionality for a modifier
+- [x] Add functionality for multiple die "sets"
+- [x] Add unit testing to check various die scenarios
