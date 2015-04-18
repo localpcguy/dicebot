@@ -46,8 +46,8 @@ module.exports = {
 
 		if (!!req.body.text) {
 			// Check token, reject if wrong
-			if (req.body.token !== config.token) {
-				return next(new Error('Invalid authorization to access this bot'));
+			if (req.body.token !== config.TOKEN) {
+				return res.status(401).send('Invalid authorization to access this bot');
 			}
 			// extract all dice
 			while (loopdie = /\d{1,2}d\d{1,2}/i.exec(reqtext)) {
