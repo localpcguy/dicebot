@@ -9,3 +9,4 @@ credit to: http://www.sitepoint.com/getting-started-slack-bots/
 - [x] Add functionality for a modifier
 - [x] Add functionality for multiple die "sets"
 - [x] Add unit testing to check various die scenarios
+- [ ] Allow negative modifiers?
