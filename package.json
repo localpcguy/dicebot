@@ -2,9 +2,10 @@
   "name": "dicebot",
   "version": "0.0.1",
   "description": "Bot for Slack to roll dice",
+  "repository": "https://github.com/localpcguy/dicebot.git",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha",
+    "test": "./node_modules/.bin/mocha --require mocha-clean",
     "start": "node index.js"
   },
   "author": "Mike Behnke",
@@ -17,6 +18,7 @@
   "devDependencies": {
     "chai": "^2.2.0",
     "mocha": "^2.2.4",
+    "mocha-clean": "^0.4.0",
     "supertest": "^0.15.0"
   }
 }

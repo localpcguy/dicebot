@@ -4,15 +4,29 @@ var request = require('request');
 var config = require('./config');
 
 var Die = {
-	init: function(die) {
+	init: function(die, isWeighted, isCheat) {
 		this.numdie = die[0] * 1;
 		this.sides = die[1] * 1;
 		this.dieNotation = die[0] + 'd' + die[1];
+		this.isWeighted = isWeighted;
+		this.isCheat = isCheat;
 
 		return this;
 	},
 	isDie: function() {
 		return !!this.numdie && !!this.sides;
+	},
+	roll: function() {
+		var min = 1;
+		var max = this.sides;
+
+		if (!this.isWeighted && this.isCheat) {
+			min = max;
+		} else if (this.isWeighted) {
+			min = Math.ceil(max * 0.75);
+		}
+
+		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
 };
 
@@ -36,13 +50,15 @@ module.exports = {
 		var dierolls = '';
 		var modTotal = 0;
 		var total = 0;
+		var weighted = false;
+		var cheater = false;
 		var botPayload = {
 				username: 'dicebot',
 				channel: req.body.channel_id,
 				icon_emoji: ':game_die:'
 			};
 
-		console.log(req.body.user_name, req.body.text);
+		//console.log(req.body.user_name, ' - ', req.body.text);
 
 		if (!!req.body.text) {
 			// Check token, reject if wrong
@@ -50,10 +66,15 @@ module.exports = {
 				res.status(401).send('Invalid authorization to access this bot');
 				return false;
 			}
+
+			// Check for weighted die flag
+			weighted = reqtext.indexOf('--weighted') > -1;
+			cheater = reqtext.indexOf('--cheat') > -1;
+
 			// extract all dice
 			while (loopdie = /\d{1,2}d\d{1,2}/i.exec(reqtext)) {
 				reqtext = reqtext.replace(loopdie[0], '');
-				loopdie = Object.create(Die).init(loopdie[0].split('d'));
+				loopdie = Object.create(Die).init(loopdie[0].split('d'), weighted, cheater);
 				if (loopdie.isDie()) {
 	 				dies.push(loopdie);
 	 			}
@@ -66,14 +87,14 @@ module.exports = {
 						.reduce(function(pv, cv) { return pv + (cv*1); }, 0);
 
 		} else {
-			dies.push(Object.create(Die).init(['1', '20'])); // default to a 1d20 die
+			dies.push(Object.create(Die).init(['1', '20'], cheater)); // default to a 1d20 die
 		}
 
 		if (!req.body.text || (req.body.text && dies.length)) {
 			for (i = 0; i < dies.length; i++) {
 				// roll dice and sum (using default if no text, otherwise using provided matches)
 				for (j = 0; j < dies[i].numdie; j++) {
-					currentRoll = roll(1, dies[i].sides);
+					currentRoll = dies[i].roll();
 					rolls.push(currentRoll);
 					total += currentRoll;
 				}
@@ -115,12 +136,6 @@ module.exports = {
 		}
 	}
 };
-
-
-
-function roll (min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-}
 
 function send (payload, callback) {
 	request({
