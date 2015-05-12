@@ -186,7 +186,7 @@ describe('Dicebot', function () {
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --cheat');
 	});
 	it('should be in the top 25% for each die if the `--weighted` flag is passed: "1d20 --weighted"', function (done) {
-		expectedResults.text = 'cheats!';
+		//expectedResults.text = 'cheats!';
 		expectedResults.betweenOrEqNums = [15, 20];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --weighted');

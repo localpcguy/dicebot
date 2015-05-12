@@ -125,7 +125,7 @@ module.exports = {
 			botPayload.text = req.body.user_name + ' rolled ' + dierolls + modTotalWithSign + ':\n' +
 							  rolls.join(' + ') + modTotalWithSign + ' = *' + total + '*';
 
-			if (cheater || weighted) {
+			if (cheater) { // || weighted // TODO: show cheats! for weighted also?
 				botPayload.text += '\n' + req.body.user_name + ' cheats!';
 			}
 
