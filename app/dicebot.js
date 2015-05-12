@@ -5,9 +5,10 @@ var config = require('./config');
 
 var Die = {
 	init: function(die, isWeighted, isCheat) {
-		this.numdie = die[0] * 1;
+		var _numdie = die[0] && die[0] * 1 || 1;
+		this.numdie = _numdie;
 		this.sides = die[1] * 1;
-		this.dieNotation = die[0] + 'd' + die[1];
+		this.dieNotation = _numdie + 'd' + die[1];
 		this.isWeighted = isWeighted;
 		this.isCheat = isCheat;
 
@@ -72,7 +73,7 @@ module.exports = {
 			cheater = reqtext.indexOf('--cheat') > -1;
 
 			// extract all dice
-			while (loopdie = /\d{1,2}d\d{1,2}/i.exec(reqtext)) {
+			while (loopdie = /\d{0,2}d\d{1,3}/i.exec(reqtext)) {
 				reqtext = reqtext.replace(loopdie[0], '');
 				loopdie = Object.create(Die).init(loopdie[0].split('d'), weighted, cheater);
 				if (loopdie.isDie()) {
@@ -83,16 +84,18 @@ module.exports = {
 			// extract all modifiers, map to a single value
 			
 			modTotal = (function getMods(curValue, modtext){
-				//var rgx = /([+-]\s*[\d]+)/;
-				var mod = modtext && modtext.match(/([+-]\s*[\d]+)/);
+				var rollModPattern = /([+-]\s*[\d]+)/;
+				var mod = modtext && modtext.match(rollModPattern);
 				
-				modtext = modtext.replace(/([+-]\s*[\d]+)/, '');
-				mod = !!mod && mod.replace(/\s*/, '') * 1;
+				modtext = modtext.replace(rollModPattern, '');
+				if (!!mod && mod.length > 0) {
+					mod = mod[0].replace(/\s*/g, '');
+					mod = mod * 1;
 
-				console.log(mod, !!mod && mod !== 0 && !isNaN(mod));
-				if (!!mod && mod !== 0 && !isNaN(mod)) {
-					curValue = curValue + mod;
-					return getMods(curValue, modtext);
+					if (!!mod && mod !== 0 && !isNaN(mod)) {
+						curValue = curValue + mod;
+						return getMods(curValue, modtext);
+					}
 				}
 
 				return curValue;
@@ -118,8 +121,12 @@ module.exports = {
 			total += modTotal;
 
 			// write response message and add to payload
-			botPayload.text = req.body.user_name + ' rolled ' + dierolls + (modTotal ? ' +' + modTotal : '') + ':\n' +
+			botPayload.text = req.body.user_name + ' rolled ' + dierolls + (modTotal > 0 ? ' +' + modTotal : (modTotal < 0 ? ' -' + modTotal * -1 : '')) + ':\n' +
 							  rolls.join(' + ') + (modTotal ? ' +' + modTotal : '') + ' = *' + total + '*';
+
+			if (cheater || weighted) {
+				botPayload.text += '\n' + req.body.user_name + ' cheats!';
+			}
 
 			// send dice roll
 			send(botPayload, sendError);

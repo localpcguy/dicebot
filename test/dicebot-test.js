@@ -79,10 +79,12 @@ describe('Dicebot', function () {
 		expect(req.body.icon_emoji).to.be.equal(expectedResults.icon_emoji);
 		if (expectedResults.matchDie) {
 			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.equal(expectedResults.matchDie);
-		} else if (expectedResults.betweenOrEqNums) {
+		}
+		if (expectedResults.betweenOrEqNums) {
 			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.least(expectedResults.betweenOrEqNums[0]);
 			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.most(expectedResults.betweenOrEqNums[1]);
-		} else {
+		}
+		if (expectedResults.text) {
 			expect(req.body.text).to.contain(expectedResults.text);
 		}
 		done();
@@ -98,6 +100,7 @@ describe('Dicebot', function () {
 	}
 	beforeEach(function() {
 		dicebot.mockAPIPath('/apimock', 'http://localhost:4567');
+		delete expectedResults.text;
 		delete expectedResults.matchDie;
 		delete expectedResults.betweenOrEqNums;
 		// body parser middleware
@@ -122,59 +125,80 @@ describe('Dicebot', function () {
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999');
 	});
+	it('should default to one die when an initial number is not passed (d6)', function (done) {
+		expectedResults.text = 'Mike rolled 1d6';
+		expectedResults.betweenOrEqNums = [1,6];
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=d6');
+	});
 	it('should show the result of a 2d6 roll', function (done) {
 		expectedResults.text = 'Mike rolled 2d6';
+		expectedResults.betweenOrEqNums = [2,12];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d6');
 	});
 	it('should show the result of a 2d8 roll with +5 modifier', function (done) {
 		expectedResults.text = 'Mike rolled 2d8 +5';
+		expectedResults.betweenOrEqNums = [7,21];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d8 +5');
 	});
+	it('should show the result of a 2d8 roll with -5 modifier', function (done) {
+		expectedResults.text = 'Mike rolled 2d8 -5';
+		expectedResults.betweenOrEqNums = [-3,11];
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=2d8 -5');
+	});
 	it('should show the result of a 2d6 +2d8 roll', function (done) {
 		expectedResults.text = 'Mike rolled 2d6 +2d8';
+		expectedResults.betweenOrEqNums = [4,28];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d6 2d8');
 	});
 	it('should show the result of a 2d10 roll with multiple modifiers (+5 +4 +6)', function (done) {
 		expectedResults.text = 'Mike rolled 2d10 +15';
+		expectedResults.betweenOrEqNums = [17,35];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d10 +5 +4 +6');
 	});
 	it('should show the result of a 2d6 +2d8 roll with multiple modifiers (+2 +5 +3) ', function (done) {
 		expectedResults.text = 'Mike rolled 2d6 +2d8 +10';
+		expectedResults.betweenOrEqNums = [14,38];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d6 2d8 +2 +5 +3');
 	});
 	it('should show be able to handle messy inputs like "+2d6+2d8  +2   +5 + 3") ', function (done) {
 		expectedResults.text = 'Mike rolled 2d6 +2d8 +10';
+		expectedResults.betweenOrEqNums = [14,38];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d6 +2d8  +2   +5 + 3');
 	});
 	it('should show be able to handle backwards inputs like "  +2   +5 + 3 +2d6+2d8") ', function (done) {
 		expectedResults.text = 'Mike rolled 2d6 +2d8 +10';
+		expectedResults.betweenOrEqNums = [14,38];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d6 +2d8  +2   +5 + 3');
 	});
 	it('should crit for each die if the `--cheat` flag is passed: "1d20 --cheat"', function (done) {
+		expectedResults.text = 'cheats!';
 		expectedResults.matchDie = 20;
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --cheat');
 	});
 	it('should be in the top 25% for each die if the `--weighted` flag is passed: "1d20 --weighted"', function (done) {
+		expectedResults.text = 'cheats!';
 		expectedResults.betweenOrEqNums = [15, 20];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --weighted');
+	});
+	it('should handle multi-digit modifiers "1d6 +22"', function (done) {
+		expectedResults.betweenOrEqNums = [23, 28];
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=1d6 +22');
 	});
 	it('should display a friendly message when given an unparseable roll', function (done) {
 		expectedResults.text = 'I don\'t know how to roll "asdf". Format die rolls as <number>d<sides>';
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=asdf');
-	});
-	it('should handle multi-digit modifiers "1d6 +22"', function (done) {
-		expectedResults.betweenOrEqNums = [23, 29];
-		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
-		sendRequest('user_name=Mike&channel_id=999&text=1d20 +22');
 	});
 });
