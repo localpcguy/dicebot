@@ -121,8 +121,9 @@ module.exports = {
 			total += modTotal;
 
 			// write response message and add to payload
-			botPayload.text = req.body.user_name + ' rolled ' + dierolls + (modTotal > 0 ? ' +' + modTotal : (modTotal < 0 ? ' -' + modTotal * -1 : '')) + ':\n' +
-							  rolls.join(' + ') + (modTotal ? ' +' + modTotal : '') + ' = *' + total + '*';
+			var modTotalWithSign = (modTotal > 0 ? ' +' + modTotal : (modTotal < 0 ? ' -' + modTotal * -1 : ''));
+			botPayload.text = req.body.user_name + ' rolled ' + dierolls + modTotalWithSign + ':\n' +
+							  rolls.join(' + ') + modTotalWithSign + ' = *' + total + '*';
 
 			if (cheater || weighted) {
 				botPayload.text += '\n' + req.body.user_name + ' cheats!';
