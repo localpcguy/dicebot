@@ -79,9 +79,9 @@ describe('Dicebot', function () {
 		expect(req.body.icon_emoji).to.be.equal(expectedResults.icon_emoji);
 		if (expectedResults.matchDie) {
 			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.equal(expectedResults.matchDie);
-		} else if (expectedResults.betweenDie) {
-			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.least(expectedResults.betweenDie[0]);
-			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.most(expectedResults.betweenDie[1]);
+		} else if (expectedResults.betweenOrEqNums) {
+			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.least(expectedResults.betweenOrEqNums[0]);
+			expect(req.body.text.match(/\*(\d+)\*/)[1] * 1).to.be.most(expectedResults.betweenOrEqNums[1]);
 		} else {
 			expect(req.body.text).to.contain(expectedResults.text);
 		}
@@ -99,7 +99,7 @@ describe('Dicebot', function () {
 	beforeEach(function() {
 		dicebot.mockAPIPath('/apimock', 'http://localhost:4567');
 		delete expectedResults.matchDie;
-		delete expectedResults.betweenDie;
+		delete expectedResults.betweenOrEqNums;
 		// body parser middleware
 		express.use(bodyParser.json());
 		server = express.listen(4567);
@@ -157,13 +157,13 @@ describe('Dicebot', function () {
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d6 +2d8  +2   +5 + 3');
 	});
-	it('should should crit for each die if the `--cheat` flag is passed: "1d20 --cheat"', function (done) {
+	it('should crit for each die if the `--cheat` flag is passed: "1d20 --cheat"', function (done) {
 		expectedResults.matchDie = 20;
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --cheat');
 	});
-	it('should should be in the top 25% for each die if the `--weighted` flag is passed: "1d20 --weighted"', function (done) {
-		expectedResults.betweenDie = [15, 20];
+	it('should be in the top 25% for each die if the `--weighted` flag is passed: "1d20 --weighted"', function (done) {
+		expectedResults.betweenOrEqNums = [15, 20];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --weighted');
 	});
@@ -171,5 +171,10 @@ describe('Dicebot', function () {
 		expectedResults.text = 'I don\'t know how to roll "asdf". Format die rolls as <number>d<sides>';
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=asdf');
+	});
+	it('should handle multi-digit modifiers "1d6 +22"', function (done) {
+		expectedResults.betweenOrEqNums = [23, 29];
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=1d20 +22');
 	});
 });

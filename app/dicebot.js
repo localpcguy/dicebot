@@ -81,10 +81,22 @@ module.exports = {
 			}
 
 			// extract all modifiers, map to a single value
-			modTotal = reqtext
-						.replace(/[^\d]*/g,'')
-						.split('')
-						.reduce(function(pv, cv) { return pv + (cv*1); }, 0);
+			
+			modTotal = (function getMods(curValue, modtext){
+				//var rgx = /([+-]\s*[\d]+)/;
+				var mod = modtext && modtext.match(/([+-]\s*[\d]+)/);
+				
+				modtext = modtext.replace(/([+-]\s*[\d]+)/, '');
+				mod = !!mod && mod.replace(/\s*/, '') * 1;
+
+				console.log(mod, !!mod && mod !== 0 && !isNaN(mod));
+				if (!!mod && mod !== 0 && !isNaN(mod)) {
+					curValue = curValue + mod;
+					return getMods(curValue, modtext);
+				}
+
+				return curValue;
+			})(0, reqtext);
 
 		} else {
 			dies.push(Object.create(Die).init(['1', '20'], cheater)); // default to a 1d20 die
