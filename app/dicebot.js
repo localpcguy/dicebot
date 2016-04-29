@@ -102,7 +102,7 @@ module.exports = {
 			})(0, reqtext);
 
 		} else {
-			dies.push(Object.create(Die).init(['1', '20'], cheater)); // default to a 1d20 die
+			dies.push(Object.create(Die).init(['1', '20'], false, false)); // default to a 1d20 die, nonweighted, noncheat
 		}
 
 		if (!req.body.text || (req.body.text && dies.length)) {
@@ -125,8 +125,12 @@ module.exports = {
 			botPayload.text = req.body.user_name + ' rolled ' + dierolls + modTotalWithSign + ':\n' +
 							  rolls.join(' + ') + modTotalWithSign + ' = *' + total + '*';
 
-			if (cheater) { // || weighted // TODO: show cheats! for weighted also?
-				botPayload.text += '\n' + req.body.user_name + ' cheats!';
+			if (cheater || weighted) {
+				if (cheater) {
+					botPayload.text += '\n' + req.body.user_name + ' crits again! (hint, they cheated)';
+				} else if (weighted) {
+					botPayload.text += '\nThere is something funny about ' + req.body.user_name + '\'s dice, they almost feel weighted...';
+				}
 			}
 
 			// send dice roll

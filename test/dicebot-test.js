@@ -179,17 +179,35 @@ describe('Dicebot', function () {
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=2d6 +2d8  +2   +5 + 3');
 	});
-	it('should crit for each die if the `--cheat` flag is passed: "1d20 --cheat"', function (done) {
-		expectedResults.text = 'cheats!';
+	it('should crit for a die if the `--cheat` flag is passed: "1d20 --cheat"', function (done) {
 		expectedResults.matchDie = 20;
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --cheat');
 	});
-	it('should be in the top 25% for each die if the `--weighted` flag is passed: "1d20 --weighted"', function (done) {
-		//expectedResults.text = 'cheats!';
+	it('should display a custom "cheated" message if the `--cheat` flag is passed: "1d20 --cheat"', function (done) {
+		expectedResults.text = 'hint, they cheated';
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=1d20 --cheat');
+	});
+	it('should crit for each die if the `--cheat` flag is passed: "4d6 2d8 --cheat"', function (done) {
+		expectedResults.matchDie = 40;
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=4d6 2d8 --cheat');
+	});
+	it('should be in the top 25% for a die if the `--weighted` flag is passed: "1d20 --weighted"', function (done) {
 		expectedResults.betweenOrEqNums = [15, 20];
 		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
 		sendRequest('user_name=Mike&channel_id=999&text=1d20 --weighted');
+	});
+	it('should display a custom "weighted" message if the `--weighted` flag is passed: "1d20 --weighted"', function (done) {
+		expectedResults.text = 'feel weighted...';
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=1d20 --weighted');
+	});
+	it('should be in the top 25% for each die if the `--weighted` flag is passed: "4d6 2d8 --weighted"', function (done) {
+		expectedResults.betweenOrEqNums = [30, 40];
+		express.post('/apimock', function(req, res) { apimock(req, res, done); } );
+		sendRequest('user_name=Mike&channel_id=999&text=4d6 2d8 --weighted');
 	});
 	it('should handle multi-digit modifiers "1d6 +22"', function (done) {
 		expectedResults.betweenOrEqNums = [23, 28];
