@@ -24,3 +24,4 @@ initial credit to: http://www.sitepoint.com/getting-started-slack-bots/
 - [x] Add unit testing to check various die scenarios
 - [x] Allow negative modifiers
 - [x] Fix multi-digit modifiers
+- [ ] Add "roll reason" to API
